@@ -70,12 +70,12 @@ class ServerQueryCog(commands.Cog):
             description=f"{server_info.get('description', 'N/A')}",
             color=discord.Color.blurple()
         )
-        embed.add_field(name="Players", value=f"{server_metrics.get('currentplayernum', 'N/A')}/{server_metrics.get('maxplayernum', 'N/A')}", inline=True)
+        embed.add_field(name="Joueurs", value=f"{server_metrics.get('currentplayernum', 'N/A')}/{server_metrics.get('maxplayernum', 'N/A')}", inline=True)
         embed.add_field(name="Version", value=server_info.get('version', 'N/A'), inline=True)
-        embed.add_field(name="Days Passed", value=server_metrics.get('days', 'N/A'), inline=True)
+        embed.add_field(name="Jours passés", value=server_metrics.get('days', 'N/A'), inline=True)
         embed.add_field(name="Uptime", value=f"{int(server_metrics.get('uptime', 'N/A') / 60)} minutes", inline=True)
         embed.add_field(name="FPS", value=server_metrics.get('serverfps', 'N/A'), inline=True)
-        embed.add_field(name="Latency", value=f"{server_metrics.get('serverframetime', 'N/A'):.2f} ms", inline=True)
+        embed.add_field(name="Latence", value=f"{server_metrics.get('serverframetime', 'N/A'):.2f} ms", inline=True)
         embed.add_field(name="WorldGUID", value=f"`{server_info.get('worldguid', 'N/A')}`", inline=False)
         embed.set_thumbnail(url=c.SPHERE_THUMBNAIL)
         return embed
@@ -83,10 +83,10 @@ class ServerQueryCog(commands.Cog):
     def create_player_embed(self, player_list):
         player_names = "\n".join([f"{player['name']}({player['accountName']}) - {player['userId']}" for player in player_list['players']])
         embed = discord.Embed(
-            title="Players",
+            title="Joueurs",
             color=discord.Color.green()
         )
-        embed.add_field(name="Online Players", value=player_names if player_names else "No players online", inline=False)
+        embed.add_field(name="Joueurs connectés", value=player_names if player_names else "Aucun joueur connecté", inline=False)
         return embed
     
     async def server_names(self, interaction: discord.Interaction, current: str):

@@ -32,26 +32,56 @@ class EventsCog(commands.Cog):
                 if channel:
                     try:
                         player_list = await api_cache.get_player_list(host, api_port, password)
-                        current_players = {(player['userId'], player['accountName']) for player in player_list['players']}
+
+                        # userId = clé stable, le reste = infos d'affichage
+                        current_players = {
+                            player["userId"]: {
+                                "accountName": player.get("accountName"),
+                                "name": player.get("name"),
+                            }
+                            for player in player_list["players"]
+                        }
 
                         if server_name not in self.player_cache:
                             self.player_cache[server_name] = current_players
                             continue
 
                         old_players = self.player_cache[server_name]
-                        joined_players = current_players - old_players
-                        left_players = old_players - current_players
 
-                        for userId, accountName in joined_players:
-                            join_text = f"Player `{accountName} ({userId})` has joined {server_name}."
-                            join = discord.Embed(title="Player Joined", description=join_text , color=discord.Color.green(), timestamp=discord.utils.utcnow())
+                        current_ids = set(current_players.keys())
+                        old_ids = set(old_players.keys())
+
+                        joined_ids = current_ids - old_ids
+                        left_ids = old_ids - current_ids
+
+                        for userId in joined_ids:
+                            p = current_players[userId]
+                            accountName = p.get("accountName") or "Unknown"
+                            name = p.get("name") or "Unknown"
+                            join_text = f"`{name} ({accountName} [{userId}])` s'est connecté."
+                            join = discord.Embed(
+                                title="Connexion",
+                                description=join_text,
+                                color=discord.Color.green(),
+                                timestamp=discord.utils.utcnow(),
+                            )
                             await channel.send(embed=join)
-                        for userId, accountName in left_players:
-                            left_text = f"Player `{accountName} ({userId})` has left {server_name}."
-                            left = discord.Embed(title="Player Left", description=left_text, color=discord.Color.red(), timestamp=discord.utils.utcnow())
+
+                        for userId in left_ids:
+                            p = old_players[userId]  # infos de la dernière fois qu'on l'a vu
+                            accountName = p.get("accountName") or "Unknown"
+                            name = p.get("name") or "Unknown"
+                            left_text = f"`{name} ({accountName} [{userId}])` s'est déconnecté."
+                            left = discord.Embed(
+                                title="Déconnexion",
+                                description=left_text,
+                                color=discord.Color.red(),
+                                timestamp=discord.utils.utcnow(),
+                            )
                             await channel.send(embed=left)
 
                         self.player_cache[server_name] = current_players
+
                     except Exception as e:
                         logging.error(f"Issues logging player on '{server_name}': {str(e)}")
 
